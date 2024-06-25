@@ -1,1 +1,0 @@
-Test-NetConnection -ComputerName 172.28.125.197 -Port 5432
