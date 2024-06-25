@@ -2,6 +2,7 @@
 .
 """
 from datetime import datetime
+from typing import Optional
 from uuid import uuid4
 from fastapi import APIRouter, Body, HTTPException, status
 from pydantic import UUID4
@@ -78,16 +79,29 @@ async def get_all(db_session: DatabaseDependency,) -> list[AtletaSchemaOut]:
         status_code=status.HTTP_200_OK,
         response_model=AtletaSchemaOut
 )
-async def get(id: UUID4, db_session: DatabaseDependency,) -> AtletaSchemaOut:
+async def get(
+    db_session: DatabaseDependency,
+    id: Optional[UUID4 | None] = None,
+    nome: Optional[str | None] = None,
+    cpf: Optional[str | None] = None
+) -> AtletaSchemaOut:
     """
     .
     """
-    atleta: AtletaSchemaOut = (await db_session.execute(select(AtletaModel).filter_by(id=id))).scalars().first()
-    if not atleta:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'Atleta com id {id} não encontrada'
-        )
+    if nome:
+        atleta: AtletaSchemaOut = (await db_session.execute(select(AtletaModel).filter_by(nome=nome))).scalars().first()
+        return atleta
+    if cpf:
+        atleta: AtletaSchemaOut = (await db_session.execute(select(AtletaModel).filter_by(cpf=cpf))).scalars().first()
+        return atleta
+
+    if id:
+        atleta: AtletaSchemaOut = (await db_session.execute(select(AtletaModel).filter_by(id=id))).scalars().first()
+        if not atleta:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f'Atleta com id {id} não encontrada'
+            )
     
     return atleta
 
